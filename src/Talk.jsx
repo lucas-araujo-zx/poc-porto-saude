@@ -537,7 +537,7 @@ export function Talk({ token, agent, onSignOut }) {
             {mode === 'text' ? (
               <section className="chat" aria-live="polite">
                 <ol className="messages" ref={listRef}>
-                  {transcript(status === 'connecting' ? 'Conectando...' : 'Escreva para o Ana.')}
+                  {transcript(status === 'connecting' ? 'Conectando...' : 'Escreva para a Ana.')}
                 </ol>
                 <form className="composer" onSubmit={send}>
                   <input
