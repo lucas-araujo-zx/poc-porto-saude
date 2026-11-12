@@ -35,7 +35,7 @@ export function Login({ error, loading, onSubmit }) {
       </header>
       <section className="login-stage">
         <div className="login-copy">
-          <h1>Fale com o Pedro sobre o status da proposta.</h1>
+          <h1>Fale com a Ana sobre o status da proposta.</h1>
           <p>
             O token abre o atendimento. A base de demonstração fica na barra ao lado, para consultar durante a conversa.
           </p>

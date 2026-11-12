@@ -229,7 +229,7 @@ export function Talk({ token, agent, onSignOut }) {
   const [copied, setCopied] = useState(false)
   const sessionRef = useRef(null)
   const listRef = useRef(null)
-  const agentName = agent?.name || 'Pedro'
+  const agentName = agent?.name || 'Ana'
 
   useEffect(() => {
     const list = listRef.current
@@ -452,7 +452,7 @@ export function Talk({ token, agent, onSignOut }) {
     }
     return messages.map((item) => (
       <li key={item.id} className={`bubble ${item.role}`}>
-        <span>{item.role === 'user' ? 'Você' : 'Pedro'}</span>
+        <span>{item.role === 'user' ? 'Você' : 'Ana'}</span>
         <p>{item.text}</p>
       </li>
     ))
@@ -537,7 +537,7 @@ export function Talk({ token, agent, onSignOut }) {
             {mode === 'text' ? (
               <section className="chat" aria-live="polite">
                 <ol className="messages" ref={listRef}>
-                  {transcript(status === 'connecting' ? 'Conectando...' : 'Escreva para o Pedro.')}
+                  {transcript(status === 'connecting' ? 'Conectando...' : 'Escreva para o Ana.')}
                 </ol>
                 <form className="composer" onSubmit={send}>
                   <input
