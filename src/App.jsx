@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { catalog, clearToken, login, readToken, writeToken } from './api.js'
+import { CasePicker } from './CasePicker.jsx'
 import { Login } from './Login.jsx'
 import { Talk } from './Talk.jsx'
 
 export function App() {
   const [token, setToken] = useState(readToken)
   const [agent, setAgent] = useState(null)
+  const [cases, setCases] = useState([])
+  const [selectedCase, setSelectedCase] = useState(null)
   const [booting, setBooting] = useState(Boolean(readToken()))
   const [loginError, setLoginError] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
@@ -13,6 +16,8 @@ export function App() {
   useEffect(() => {
     if (!token) {
       setAgent(null)
+      setCases([])
+      setSelectedCase(null)
       setBooting(false)
       return undefined
     }
@@ -22,6 +27,7 @@ export function App() {
       .then((data) => {
         if (!cancelled) {
           setAgent(data.voice)
+          setCases(data.cases ?? [])
         }
       })
       .catch((error) => {
@@ -29,6 +35,8 @@ export function App() {
           clearToken()
           setToken('')
           setAgent(null)
+          setCases([])
+          setSelectedCase(null)
           setLoginError(error.message)
         }
       })
@@ -60,6 +68,8 @@ export function App() {
     clearToken()
     setToken('')
     setAgent(null)
+    setCases([])
+    setSelectedCase(null)
   }
 
   if (!token || !agent) {
@@ -72,5 +82,24 @@ export function App() {
     )
   }
 
-  return <Talk token={token} agent={agent} onSignOut={signOut} />
+  if (!selectedCase) {
+    return (
+      <CasePicker
+        cases={cases}
+        onOpen={setSelectedCase}
+        onSignOut={signOut}
+      />
+    )
+  }
+
+  return (
+    <Talk
+      key={selectedCase.id}
+      token={token}
+      agent={agent}
+      caseData={selectedCase}
+      onBack={() => setSelectedCase(null)}
+      onSignOut={signOut}
+    />
+  )
 }

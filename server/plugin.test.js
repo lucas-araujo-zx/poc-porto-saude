@@ -82,10 +82,13 @@ test('catalog abre a sessão do Pedro e a conversa de outro agente fica de fora'
     assert.equal(catalog.status, 200)
     assert.equal(catalog.payload.voice.name, 'Porto Saúde - Pedro - Receptivo')
     assert.equal(catalog.payload.voice.id, VOICE_AGENT.id)
+    assert.equal(catalog.payload.cases.length, 10)
+    assert.equal(catalog.payload.cases[0].proposalNumber, '40203944876')
 
-    const signed = await call('GET', '/api/signed-url', env.loginToken)
+    const signed = await call('GET', '/api/signed-url', env.loginToken, 'case_id=caso-01')
     assert.equal(signed.status, 200)
     assert.equal(signed.payload.signedUrl, 'wss://exemplo')
+    assert.equal(signed.payload.dynamicVariables.case_proposal_number, '40203944876')
 
     const badId = await call('GET', '/api/conversation', env.loginToken, 'conversation_id=nao-e-id')
     assert.equal(badId.status, 400)

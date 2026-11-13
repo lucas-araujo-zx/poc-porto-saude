@@ -1,4 +1,5 @@
 import { agentDisplayName, resolveAgent, tokensMatch } from './agents.js'
+import { dynamicVariables, findCase, listCases, presentCase } from './cases.js'
 import { isConversationId, presentConversation } from './conversation.js'
 
 function requestUrl(req) {
@@ -132,10 +133,21 @@ export async function dispatchApi({ method, pathname, searchParams, token, body 
 
   if (path === '/api/catalog') {
     const voiceAgent = await withLiveName(env, voice)
-    return { status: 200, payload: { voice: voiceAgent } }
+    return {
+      status: 200,
+      payload: {
+        voice: voiceAgent,
+        cases: listCases().map(presentCase),
+      },
+    }
   }
 
   if (path === '/api/signed-url') {
+    const caseId = searchParams.get('case_id') ?? ''
+    const selectedCase = findCase(caseId)
+    if (!selectedCase) {
+      return { status: 404, payload: { error: 'Escolha um caso de uso.' } }
+    }
     const remote = await elevenFetch(
       env,
       `/v1/convai/conversation/get-signed-url?agent_id=${encodeURIComponent(voice.id)}`,
@@ -148,7 +160,10 @@ export async function dispatchApi({ method, pathname, searchParams, token, body 
     }
     return {
       status: 200,
-      payload: { signedUrl: remote.body.signed_url },
+      payload: {
+        signedUrl: remote.body.signed_url,
+        dynamicVariables: dynamicVariables(selectedCase),
+      },
     }
   }
 

@@ -1,7 +1,6 @@
 import { Conversation } from '@elevenlabs/client'
 import { useEffect, useRef, useState } from 'react'
 import { conversationResult, signedUrl } from './api.js'
-import { DEMO } from './demo.js'
 import { Mark } from './Mark.jsx'
 import { Orb } from './Orb.jsx'
 
@@ -188,35 +187,40 @@ function ConversationResult({ conversationId, result, error, copied, onCopy }) {
   )
 }
 
-function DemoSheet() {
+function CaseSheet({ caseData }) {
   return (
-    <aside className="client-sheet" aria-label="Base de demonstração">
-      <p className="kicker">{DEMO.kicker}</p>
-      <h2>{DEMO.title}</h2>
-      <p className="status-pill">{DEMO.status}</p>
+    <aside className="client-sheet" aria-label="Caso de uso selecionado">
+      <p className="kicker">Caso de uso selecionado</p>
+      <h2>{caseData.contactName || 'Contato não identificado'}</h2>
+      <p className="status-pill">{caseData.status}</p>
       <p className="client-tail">
-        <span>{DEMO.highlightLabel}</span>
-        <strong>{DEMO.highlight}</strong>
+        <span>Proposta</span>
+        <strong>{caseData.proposalNumber}</strong>
       </p>
-      <p className="sheet-note">{DEMO.note}</p>
-      {DEMO.groups.map(([title, fields]) => (
-        <section className="client-group" key={title}>
-          <h3>{title}</h3>
-          <dl>
-            {fields.map(([label, value]) => (
-              <div key={label}>
-                <dt>{label}</dt>
-                <dd>{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-      ))}
+      <p className="sheet-note">
+        Dados exibidos para a demonstração. O agente consulta somente o número da proposta.
+      </p>
+      <section className="client-group">
+        <h3>Contato</h3>
+        <dl>
+          <div><dt>Perfil</dt><dd>{caseData.contactRole || '—'}</dd></div>
+          <div><dt>Organização</dt><dd>{caseData.organization || '—'}</dd></div>
+          <div><dt>Autenticação</dt><dd>{caseData.authenticationHint || '—'}</dd></div>
+        </dl>
+      </section>
+      <section className="client-group">
+        <h3>Retorno do sistema</h3>
+        <dl>
+          <div><dt>Status</dt><dd>{caseData.status}</dd></div>
+          <div><dt>Explicação</dt><dd>{caseData.explanation}</dd></div>
+          <div><dt>Próximo passo</dt><dd>{caseData.nextStep}</dd></div>
+        </dl>
+      </section>
     </aside>
   )
 }
 
-export function Talk({ token, agent, onSignOut }) {
+export function Talk({ token, agent, caseData, onBack, onSignOut }) {
   const [mode, setMode] = useState('voice')
   const [status, setStatus] = useState('idle')
   const [agentMode, setAgentMode] = useState('listening')
@@ -229,7 +233,7 @@ export function Talk({ token, agent, onSignOut }) {
   const [copied, setCopied] = useState(false)
   const sessionRef = useRef(null)
   const listRef = useRef(null)
-  const agentName = agent?.name || 'Ana'
+  const agentName = 'Ana'
 
   useEffect(() => {
     const list = listRef.current
@@ -340,9 +344,10 @@ export function Talk({ token, agent, onSignOut }) {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
         stream.getTracks().forEach((track) => track.stop())
       }
-      const session = await signedUrl(token)
+      const session = await signedUrl(token, caseData.id)
       const conversation = await Conversation.startSession({
         signedUrl: session.signedUrl,
+        dynamicVariables: session.dynamicVariables,
         connectionType: 'websocket',
         textOnly: nextMode === 'text',
         onConnect: () => setStatus('connected'),
@@ -469,6 +474,9 @@ export function Talk({ token, agent, onSignOut }) {
           <button type="button" className="quiet" onClick={onSignOut}>
             Sair
           </button>
+          <button type="button" className="quiet" onClick={onBack}>
+            Trocar caso
+          </button>
           <button type="button" className="mode-switch" onClick={switchMode}>
             {mode === 'voice' ? 'Conversar por texto' : 'Falar por voz'}
           </button>
@@ -476,7 +484,7 @@ export function Talk({ token, agent, onSignOut }) {
       </header>
 
       <div className="talk-body">
-        <DemoSheet />
+        <CaseSheet caseData={caseData} />
         <div className="talk-main">
           <main className="talk-stage">
             {mode === 'text' && ended ? null : (

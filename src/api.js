@@ -44,8 +44,8 @@ export function catalog(token) {
   return request('/api/catalog', { token })
 }
 
-export function signedUrl(token) {
-  return request('/api/signed-url', { token })
+export function signedUrl(token, caseId) {
+  return request(`/api/signed-url?case_id=${encodeURIComponent(caseId)}`, { token })
 }
 
 export function conversationResult(token, conversationId) {
